@@ -1,0 +1,10 @@
+{
+    "watch": ["src/index.js"],
+    "execMap": {
+      "js": "node"
+    },
+    "events": {
+      "start": "node src/index.js"
+    }
+  }
+  
