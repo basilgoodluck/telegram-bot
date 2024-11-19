@@ -11,11 +11,19 @@ let db;
 async function connect() {
     if(!db){
         await client.connect()
-        db = client.db("noble-bot")
+        db = client.db("telegram-bot")
 
     }
     
     return db    
 }
 
-export {connect}
+async function getWelcome() {
+    const db = await connect();
+    const welcomeCollection = db.collection("welcome messages");
+
+    return Array.from(welcomeCollection.find({}))
+}
+
+export { getWelcome }
+

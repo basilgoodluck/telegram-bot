@@ -1,55 +1,60 @@
-import http from "http";
-import { Telegraf } from "telegraf";
-import dotenv from "dotenv";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { Telegraf } from 'telegraf';
+import { Scenes, session } from 'telegraf';
+import { message } from 'telegraf/filters';
+import { getWelcome } from './database/mongodb.js';
+import { config as configDotenv } from "dotenv";
 
-dotenv.config(); 
+configDotenv();
+const bot = new Telegraf(process.env.TOKEN);
 
-const bot = new Telegraf(process.env.TOKEN);  
+const loadWlc = async () => {
+    const msgs = await getWelcome()
+    console.log(msgs)
+}
 
-const server = http.createServer((req, res) => {
-  if (req.method === 'POST' && req.url === '/webhook-path') {
-    let body = '';
+loadWlc()
 
-    req.on('data', chunk => {
-      body += chunk.toString(); 
-    });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename)
+const lock_file = path.join(__dirname, "bot.lock")
 
-    req.on('end', () => {
-      try {
-        const update = JSON.parse(body);  
-        bot.handleUpdate(update);         
-        res.writeHead(200);               
-        res.end('OK');
-      } catch (error) {
-        console.error('Error handling update:', error);
-        res.writeHead(400);              
-        res.end('Invalid request');
-      }
-    });
-  } else {
-    res.writeHead(404);
-    res.end('Not Found');
-  }
-});
+const startBot = async () => {
+    try {
+        if(fs.existsSync(lock_file)){
+            console.log("Bot is already running! If not, delete bot.lock file.")
+            process.exit(1)
+        }
 
-const PORT = process.env.PORT || 3000;  
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+        fs.writeFileSync(lock_file, "locked")
+        await bot.launch()
+        console.log("Bot has started successfully")
 
-bot.use((ctx, next) => {
-  if (ctx.update.message && ctx.update.message.new_chat_members) {
-    ctx.update.message.new_chat_members.forEach((newMember) => {
-      const welcomeMessage = `Welcome, [${newMember.first_name}](tg://user?id=${newMember.id})\\!`;
-      ctx.replyWithMarkdownV2(welcomeMessage);
-    });
-  }
-  return next();
-});
+        process.once("SIGINT", () => {
+            bot.stop("SIGINT")
+            console.log("Bot stopped SIGINT")
+        })
 
-bot.launch({
-  webhook: {
-    domain: 'https://your-domain.com',  
-    path: '/webhook-path', 
-  },
-});
+        process.once("SIGTERM", () => {
+            bot.stop("SIGTERM")
+            console.log("Bot stopped SIGTERM")
+        })
+    }
+    catch(err) {
+        console.error("Error starting bot: ", err)
+        stopBot()
+    }
+}
+
+const stopBot = async () => {
+    if(fs.existsSync(lock_file)){
+        fs.unlinkSync(lock_file)
+    }
+
+    bot.stop("SIGTERM")
+    console.log("bot has been stopped")
+    process.exit(1)
+}
+startBot()
