@@ -4,7 +4,7 @@
       "js": "node"
     },
     "events": {
-      "start": "node src/index.js"
+      "start": "node api/index.js"
     }
   }
   
