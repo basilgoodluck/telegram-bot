@@ -10,9 +10,16 @@ import { config as configDotenv } from "dotenv";
 configDotenv();
 const bot = new Telegraf(process.env.TOKEN);
 
+async function createInviteLink() {
+    return `https://t.me/noble_la_bot?startgroup=admin&admin=delete_messages+manage_chat+restrict_members+pin_messages`;
+}
+
 const loadWlc = async () => {
     const msgs = await getWelcome()
     console.log(msgs)
+}
+async function welcomes() {
+    
 }
 
 loadWlc()
@@ -57,4 +64,5 @@ const stopBot = async () => {
     console.log("bot has been stopped")
     process.exit(1)
 }
+
 startBot()
