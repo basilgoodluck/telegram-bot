@@ -3,9 +3,6 @@ import http from "node:http";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { Telegraf } from 'telegraf';
-import { Scenes, session } from 'telegraf';
-import { message } from 'telegraf/filters';
-import { getWelcome } from './database/mongodb.js';
 import { config as configDotenv } from "dotenv";
 
 configDotenv();
@@ -16,7 +13,6 @@ const hostname = process.env.HOSTNAME || 'localhost';
 
 const server = http.createServer((req, res) => {
     const { url, method } = req;
-
     console.log(`Incoming request: ${method} ${url}`);
 
     res.setHeader("Content-Type", "application/json");
@@ -33,19 +29,29 @@ const server = http.createServer((req, res) => {
     } 
     else {
         res.statusCode = 404;
-        res.end(JSON.stringify({ message: "No route found" })); 
+        res.end(JSON.stringify({ message: "No route found" }));
     }
 });
 
-server.listen(() => {
+server.listen(PORT, () => {
     console.log(`Server is running at http://${hostname}:${PORT}`);
 });
 
+const shutdown = () => {
+    console.log("Shutting down gracefully...");
+    bot.stop("SIGTERM");
+    server.close(() => {
+        console.log("Server closed.");
+        process.exit(0);
+    });
+};
+
+process.once("SIGINT", shutdown);
+process.once("SIGTERM", shutdown);
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename)
-const lock_file = path.join(__dirname, "bot.lock")
-
+const __dirname = path.dirname(__filename);
+const lock_file = path.join(__dirname, "bot.lock");
 
 const startBot = async () => {
     try {
@@ -58,15 +64,8 @@ const startBot = async () => {
         await bot.launch();
         console.log("Bot has started successfully");
 
-        process.once("SIGINT", () => {
-            bot.stop("SIGINT");
-            console.log("Bot stopped SIGINT");
-        });
-
-        process.once("SIGTERM", () => {
-            bot.stop("SIGTERM");
-            console.log("Bot stopped SIGTERM");
-        });
+        process.once("SIGINT", shutdown);
+        process.once("SIGTERM", shutdown);
     }
     catch (err) {
         console.error("Error starting bot: ", err);
@@ -78,7 +77,6 @@ const stopBot = async () => {
     if (fs.existsSync(lock_file)) {
         fs.unlinkSync(lock_file);
     }
-
     bot.stop("SIGTERM");
     console.log("Bot has been stopped");
     process.exit(1);
