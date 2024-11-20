@@ -2,7 +2,7 @@
   "name": "telegram-bot",
   "version": "1.0.0",
   "type": "module",
-  "description": "Telegram Bot using Telegraf and BotFather",
+  "description": "Telegram Bot using telegraf and botfather",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
