@@ -46,6 +46,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename)
 const lock_file = path.join(__dirname, "bot.lock")
 
+bot.start((ctx) => ctx.reply('Welcome'))
+
 const startBot = async () => {
     try {
         if (fs.existsSync(lock_file)) {
