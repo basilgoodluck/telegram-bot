@@ -19,11 +19,11 @@ const server = http.createServer((req, res) => {
 
     res.setHeader("content-type", "application/json")
     if(url === "/" && method === "GET"){
-        res.statusCode(200)
+        res.statusCode = 200
         res.end(json.Stringify({"message": "Welcome to my telegram bot"}))
     }
     else if(url === "/api/data" && "GET"){
-        res.statusCode(200)
+        res.statusCode === 200
         res.end(json.Stringify({"message": "this is the about page"}))
     }
     else{
