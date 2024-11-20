@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import http from "node:http"
+import http from "node:http";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { Telegraf } from 'telegraf';
@@ -7,34 +7,34 @@ import { Scenes, session } from 'telegraf';
 import { message } from 'telegraf/filters';
 import { getWelcome } from './database/mongodb.js';
 import { config as configDotenv } from "dotenv";
-import { json } from "node:stream/consumers";
 
 configDotenv();
+
 const bot = new Telegraf(process.env.TOKEN);
-const PORT = process.env.PORT || 3000
-const hostname = process.env.HOSTNAME
+const PORT = process.env.PORT || 3000;
+const hostname = process.env.HOSTNAME || 'localhost';
 
 const server = http.createServer((req, res) => {
     const { url, method } = req;
 
-    res.setHeader("content-type", "application/json")
-    if(url === "/" && method === "GET"){
-        res.statusCode = 200
-        res.end(json.Stringify({"message": "Welcome to my telegram bot"}))
+    res.setHeader("Content-Type", "application/json");
+
+    if (url === "/" && method === "GET") {
+        res.statusCode = 200;
+        res.end(JSON.stringify({ message: "Welcome to my telegram bot" }));
+    } else if (url === "/api/data" && method === "GET") {
+        res.statusCode = 200;
+        res.end(JSON.stringify({ message: "This is the about page" }));
+    } else {
+        res.statusCode = 404;
+        res.end(JSON.stringify({ message: "No route found" }));
     }
-    else if(url === "/api/data" && "GET"){
-        res.statusCode === 200
-        res.end(json.Stringify({"message": "this is the about page"}))
-    }
-    else{
-        res.statusCode === 404;
-        res.end(json.Stringify({"message": "no route found"}))
-    }
-})
+});
 
 server.listen(PORT, () => {
-    console.log(`server is running on ${PORT} & ${hostname}`)
-})
+    console.log(`Server is running at http://${hostname}:${PORT}`);
+});
+
 
 async function createInviteLink() {
     return `https://t.me/noble_la_bot?startgroup=admin&admin=delete_messages+manage_chat+restrict_members+pin_messages`;
