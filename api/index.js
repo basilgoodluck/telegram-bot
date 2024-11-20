@@ -42,46 +42,46 @@ server.listen(() => {
 });
 
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename)
-// const lock_file = path.join(__dirname, "bot.lock")
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename)
+const lock_file = path.join(__dirname, "bot.lock")
 
 
-// const startBot = async () => {
-//     try {
-//         if (fs.existsSync(lock_file)) {
-//             console.log("Bot is already running! If not, delete bot.lock file.");
-//             process.exit(1);
-//         }
+const startBot = async () => {
+    try {
+        if (fs.existsSync(lock_file)) {
+            console.log("Bot is already running! If not, delete bot.lock file.");
+            process.exit(1);
+        }
 
-//         fs.writeFileSync(lock_file, "locked");
-//         await bot.launch();
-//         console.log("Bot has started successfully");
+        fs.writeFileSync(lock_file, "locked");
+        await bot.launch();
+        console.log("Bot has started successfully");
 
-//         process.once("SIGINT", () => {
-//             bot.stop("SIGINT");
-//             console.log("Bot stopped SIGINT");
-//         });
+        process.once("SIGINT", () => {
+            bot.stop("SIGINT");
+            console.log("Bot stopped SIGINT");
+        });
 
-//         process.once("SIGTERM", () => {
-//             bot.stop("SIGTERM");
-//             console.log("Bot stopped SIGTERM");
-//         });
-//     }
-//     catch (err) {
-//         console.error("Error starting bot: ", err);
-//         stopBot();
-//     }
-// };
+        process.once("SIGTERM", () => {
+            bot.stop("SIGTERM");
+            console.log("Bot stopped SIGTERM");
+        });
+    }
+    catch (err) {
+        console.error("Error starting bot: ", err);
+        stopBot();
+    }
+};
 
-// const stopBot = async () => {
-//     if (fs.existsSync(lock_file)) {
-//         fs.unlinkSync(lock_file);
-//     }
+const stopBot = async () => {
+    if (fs.existsSync(lock_file)) {
+        fs.unlinkSync(lock_file);
+    }
 
-//     bot.stop("SIGTERM");
-//     console.log("Bot has been stopped");
-//     process.exit(1);
-// };
+    bot.stop("SIGTERM");
+    console.log("Bot has been stopped");
+    process.exit(1);
+};
 
-// startBot();
+startBot();
